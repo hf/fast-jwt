@@ -206,10 +206,17 @@ function detectPrivateKeyAlgorithm(key, providedAlgorithm) {
   }
 }
 
-function detectPublicKeyAlgorithms(key) {
+function detectPublicKeyAlgorithms(key, providedAlgorithms) {
   if (!key) {
     return 'none'
   }
+
+  // If all provided algorithms are HS, skip detection and caching entirely
+  // since the key might look like a PEM but should be used as a raw HMAC secret
+  if (providedAlgorithms && providedAlgorithms.length && providedAlgorithms.every(a => hsAlgorithms.includes(a))) {
+    return providedAlgorithms
+  }
+
   // Check cache first
   const [cached, error] = publicKeysCache.get(key) || []
 
